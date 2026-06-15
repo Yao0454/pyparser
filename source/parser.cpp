@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> parse_indent(const std::vector<Line> &lines) {
+std::vector<std::string> mark_indents(const std::vector<Line> &lines) {
 
     std::vector<std::string> lines_with_indent;
     std::stack<size_t> indent_stack;
@@ -15,21 +15,21 @@ std::vector<std::string> parse_indent(const std::vector<Line> &lines) {
     for (const auto &line : lines) {
         if (line.indent == indent_stack.top()) {
 
-            lines_with_indent.push_back(line.line);
+            lines_with_indent.push_back(line.text);
         } else if (line.indent > indent_stack.top()) {
             indent_stack.push(line.indent);
             lines_with_indent.push_back("INDENT");
-            lines_with_indent.push_back(line.line);
+            lines_with_indent.push_back(line.text);
         } else {
             while (line.indent < indent_stack.top()) {
                 indent_stack.pop();
                 lines_with_indent.push_back("DEDENT");
             }
             if (line.indent != indent_stack.top()) {
-                std::cerr << "IndentationError: " << line.line << "\n";
+                std::cerr << "IndentationError: " << line.text << "\n";
                 throw std::runtime_error("Indentation Error");
             }
-            lines_with_indent.push_back(line.line);
+            lines_with_indent.push_back(line.text);
         }
     }
 
@@ -41,7 +41,7 @@ std::vector<std::string> parse_indent(const std::vector<Line> &lines) {
     return lines_with_indent;
 }
 
-std::vector<Token> parse_token(const std::vector<std::string> &lines) {
+std::vector<Token> tokenize(const std::vector<std::string> &lines) {
     std::vector<Token> tokens;
 
     for (const std::string &line : lines) {
@@ -62,9 +62,9 @@ std::vector<Token> parse_token(const std::vector<std::string> &lines) {
                 } else if (word == "if") {
                     tokens.push_back({word, TokenType::IF});
                 } else if (word == "INDENT") {
-                    tokens.push_back({"{", TokenType::LCBRAK});
+                    tokens.push_back({"{", TokenType::LBRACE});
                 } else if (word == "DEDENT") {
-                    tokens.push_back({"}", TokenType::RCBRAK});
+                    tokens.push_back({"}", TokenType::RBRACE});
                 } else {
                     tokens.push_back({word, TokenType::IDENT});
                 }
@@ -94,7 +94,7 @@ std::vector<Token> parse_token(const std::vector<std::string> &lines) {
                 continue;
             } else if (c == '+') {
                 i += 1;
-                tokens.push_back({"+", TokenType::ADD});
+                tokens.push_back({"+", TokenType::PLUS});
                 continue;
             } else if (c == '=') {
                 i += 1;
@@ -102,15 +102,15 @@ std::vector<Token> parse_token(const std::vector<std::string> &lines) {
                 continue;
             } else if (c == ':') {
                 i += 1;
-                tokens.push_back({":", TokenType::COLOM});
+                tokens.push_back({":", TokenType::COLON});
                 continue;
             } else if (c == '(') {
                 i += 1;
-                tokens.push_back({"(", TokenType::LBRAK});
+                tokens.push_back({"(", TokenType::LPAREN});
                 continue;
             } else if (c == ')') {
                 i += 1;
-                tokens.push_back({")", TokenType::RBRAK});
+                tokens.push_back({")", TokenType::RPAREN});
                 continue;
             } else if (c == '>') {
                 i += 1;

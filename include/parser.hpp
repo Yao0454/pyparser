@@ -6,35 +6,33 @@
 #include <vector>
 
 struct Line {
-    std::string line;
+    std::string text;
     size_t indent;
 };
 
 enum class TokenType {
     IDENT,
-    LBRAK,
-    RBRAK,
-    COLOM,
-    EQUAL,
-    ADD,
+    LPAREN,
+    RPAREN,
+    COLON,
+    PLUS,
     GREATER,
     IF,
     ASSIGN,
     DEF,
     NUMBER,
-    LCBRAK,
-    RCBRAK,
+    LBRACE,
+    RBRACE,
     STRING,
-
 };
 
 struct Token {
-    std::string token;
+    std::string value;
     TokenType type;
 };
 
-std::vector<std::string> parse_indent(const std::vector<Line> &lines);
+std::vector<std::string> mark_indents(const std::vector<Line> &lines);
 
-std::vector<Token> parse_token(const std::vector<std::string> &lines);
+std::vector<Token> tokenize(const std::vector<std::string> &lines);
 
 #endif // PARSER_HPP_

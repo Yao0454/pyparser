@@ -43,11 +43,11 @@ int main() {
     }
     file.close();
 
-    std::vector<std::string> lines_with_indent = parse_indent(lines);
+    std::vector<std::string> lines_with_indent = mark_indents(lines);
 
-    std::vector<Token> tokens = parse_token(lines_with_indent);
+    std::vector<Token> tokens = tokenize(lines_with_indent);
 
     for (const Token &token : tokens) {
-        std::println("{}", token.token);
+        std::println("{}", token.value);
     }
 }
