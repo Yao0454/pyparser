@@ -24,6 +24,7 @@ enum class TokenType {
     NUMBER,
     LCBRAK,
     RCBRAK,
+    STRING,
 
 };
 

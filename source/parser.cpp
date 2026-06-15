@@ -1,6 +1,7 @@
 #include "parser.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <stack>
 #include <string>
 #include <vector>
@@ -67,6 +68,19 @@ std::vector<Token> parse_token(const std::vector<std::string> &lines) {
                 } else {
                     tokens.push_back({word, TokenType::IDENT});
                 }
+                continue;
+            } else if (c == '"') {
+                size_t start = i;
+                i += 1;
+                while (i < line.size() && line[i] != '"') {
+                    i += 1;
+                    if (i >= line.size()) {
+                        std::cerr << "SyntaxError: unterminated string\n";
+                        assert(false && "unterminated string");
+                    }
+                }
+                tokens.push_back({line.substr(start + 1, i - start - 1), TokenType::STRING});
+                i += 1;
                 continue;
             } else if (std::isdigit(static_cast<unsigned char>(c))) {
                 size_t start = i;

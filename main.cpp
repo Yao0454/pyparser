@@ -2,6 +2,7 @@
 #include <fstream>
 #include <print>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 size_t count_indent(const std::string &line) {
@@ -43,7 +44,10 @@ int main() {
     file.close();
 
     std::vector<std::string> lines_with_indent = parse_indent(lines);
-    for (const std::string &line : lines_with_indent) {
-        std::println("{}", line);
+
+    std::vector<Token> tokens = parse_token(lines_with_indent);
+
+    for (const Token &token : tokens) {
+        std::println("{}", token.token);
     }
 }

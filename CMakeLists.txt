@@ -9,8 +9,8 @@ if(APPLE)
 endif()
 
 file(GLOB SRC_FILES
-    "${CMAKE_SOURCE_DIR}/parser.cpp"
+    "${CMAKE_SOURCE_DIR}/source/parser.cpp"
 )
 
 add_executable(pyparser main.cpp ${SRC_FILES})
-target_include_directories(pyparser PRIVATE "${CMAKE_SOURCE_DIR}")
+target_include_directories(pyparser PRIVATE "${CMAKE_SOURCE_DIR}/include")
