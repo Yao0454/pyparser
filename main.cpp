@@ -1,15 +1,8 @@
-#include <cstddef>
+#include "parser.hpp"
 #include <fstream>
-#include <iostream>
 #include <print>
-#include <stack>
-#include <string>
+#include <stdexcept>
 #include <vector>
-
-struct Line {
-    std::string line;
-    size_t indent;
-};
 
 size_t count_indent(const std::string &line) {
     size_t n = 0;
@@ -33,34 +26,6 @@ std::string strip(const std::string &s) {
     return s.substr(start, end - start + 1);
 }
 
-void parse_indent(const std::vector<Line> &lines) {
-
-    std::stack<size_t> indent_stack;
-    indent_stack.push(0);
-    std::println("INDENT");
-
-    for (auto line : lines) {
-        if (line.indent == indent_stack.top()) {
-            std::println("{}", line.line);
-        } else if (line.indent > indent_stack.top()) {
-            indent_stack.push(line.indent);
-            std::println("INDENT");
-            std::println("{}", line.line);
-        } else {
-            while (line.indent != indent_stack.top()) {
-                indent_stack.pop();
-                std::println("DEDENT");
-            }
-            std::println("{}", line.line);
-        }
-    }
-
-    while (!indent_stack.empty()) {
-        indent_stack.pop();
-        std::println("DEDENT");
-    }
-}
-
 int main() {
     std::ifstream file("./pyfile.py");
     if (!file) {
@@ -71,11 +36,14 @@ int main() {
     std::vector<Line> lines;
     std::string buf;
     while (std::getline(file, buf)) {
-        if (buf.empty())
+        if (strip(buf).empty())
             continue;
         lines.push_back({strip(buf), count_indent(buf)});
     }
     file.close();
 
-    parse_indent(lines);
+    std::vector<std::string> lines_with_indent = parse_indent(lines);
+    for (const std::string &line : lines_with_indent) {
+        std::println("{}", line);
+    }
 }
