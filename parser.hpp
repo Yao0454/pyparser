@@ -19,6 +19,12 @@ enum class TokenType {
     ADD,
     GREATER,
     IF,
+    ASSIGN,
+    DEF,
+    NUMBER,
+    LCBRAK,
+    RCBRAK,
+
 };
 
 struct Token {
@@ -28,6 +34,6 @@ struct Token {
 
 std::vector<std::string> parse_indent(const std::vector<Line> &lines);
 
-void parse_token(const std::vector<Line> &lines);
+std::vector<Token> parse_token(const std::vector<std::string> &lines);
 
 #endif // PARSER_HPP_
