@@ -1,4 +1,5 @@
 #include "lexer.hpp"
+#include "parser.hpp"
 #include <fstream>
 #include <print>
 #include <stdexcept>
@@ -47,7 +48,13 @@ int main() {
 
     std::vector<Token> tokens = tokenize(lines_with_indent);
 
-    for (const Token &token : tokens) {
-        std::println("{}", token.value);
+    // for (const Token &token : tokens) {
+    //     std::println("{}", token.value);
+    // }
+
+    size_t pos = 0;
+    while (peek(tokens, pos).type != TokenType::END) {
+        parse_statement(tokens, pos);
     }
+    std::println("Parse OK");
 }

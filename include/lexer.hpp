@@ -16,7 +16,9 @@ enum class TokenType {
     RPAREN,
     COLON,
     PLUS,
+    MINUS,
     GREATER,
+    LESS,
     IF,
     ASSIGN,
     DEF,
@@ -24,6 +26,7 @@ enum class TokenType {
     LBRACE,
     RBRACE,
     STRING,
+    END,
 };
 
 struct Token {

@@ -8,10 +8,9 @@ if(APPLE)
     list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew")
 endif()
 
-file(GLOB SRC_FILES
-    "${CMAKE_SOURCE_DIR}/source/parser.cpp"
-    "${CMAKE_SOURCE_DIR}/source/lexer.cpp"
+add_executable(pyparser
+    main.cpp
+    source/lexer.cpp
+    source/parser.cpp
 )
-
-add_executable(pyparser main.cpp ${SRC_FILES})
 target_include_directories(pyparser PRIVATE "${CMAKE_SOURCE_DIR}/include")

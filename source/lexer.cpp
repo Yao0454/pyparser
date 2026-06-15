@@ -96,6 +96,10 @@ std::vector<Token> tokenize(const std::vector<std::string> &lines) {
                 i += 1;
                 tokens.push_back({"+", TokenType::PLUS});
                 continue;
+            } else if (c == '-') {
+                i += 1;
+                tokens.push_back({"-", TokenType::MINUS});
+                continue;
             } else if (c == '=') {
                 i += 1;
                 tokens.push_back({"=", TokenType::ASSIGN});
@@ -115,10 +119,14 @@ std::vector<Token> tokenize(const std::vector<std::string> &lines) {
             } else if (c == '>') {
                 i += 1;
                 tokens.push_back({">", TokenType::GREATER});
+            } else if (c == '<') {
+                i += 1;
+                tokens.push_back({"<", TokenType::LESS});
             } else {
                 assert(false && "Unknown char expected");
             }
         }
     }
+    tokens.push_back({"", TokenType::END});
     return tokens;
 }
