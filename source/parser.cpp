@@ -21,21 +21,21 @@ void expect(const std::vector<Token> &tokens, size_t &pos, TokenType t) {
 Node parse_primary(const std::vector<Token> &tokens, size_t &pos) {
     switch (peek(tokens, pos).type) {
     case TokenType::NUMBER: {
-        advance(tokens, pos);
+        Token current = advance(tokens, pos);
         return Node{
             NodeType::NUMBER,
-            peek(tokens, pos).line_number,
-            peek(tokens, pos).value,
+            current.line_number,
+            current.value,
             {},
         };
     }
 
     case TokenType::STRING: {
-        advance(tokens, pos);
+        Token current = advance(tokens, pos);
         return {
             NodeType::STRING,
-            peek(tokens, pos).line_number,
-            peek(tokens, pos).value,
+            current.line_number,
+            current.value,
             {},
         };
     }
