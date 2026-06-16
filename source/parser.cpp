@@ -73,8 +73,7 @@ Node parse_primary(const std::vector<Token> &tokens, size_t &pos) {
     default:
         std::cerr << "[Error]: At Line " << peek(tokens, pos).line_number << " "
                   << peek(tokens, pos).value << "\n";
-        std::cerr << "Unexpeted token in expression\n";
-        assert(false && "Unexpeted token in parse_primary");
+        throw std::runtime_error("Unexpeted token in expression\n");
     }
 }
 
@@ -112,52 +111,89 @@ Node parse_expression(const std::vector<Token> &tokens, size_t &pos) {
 
 Node parse_statement(const std::vector<Token> &tokens, size_t &pos) {
     switch (peek(tokens, pos).type) {
-    case TokenType::DEF:
-        advance(tokens, pos);
+    case TokenType::DEF: {
+        Token token = advance(tokens, pos);
+        Token name = peek(tokens, pos);
+        Node node = {
+            NodeType::FUNCDEF,
+            token.line_number,
+            name.value,
+            {},
+        };
         expect(tokens, pos, TokenType::IDENT);
         expect(tokens, pos, TokenType::LPAREN);
         while (peek(tokens, pos).type != TokenType::RPAREN &&
                peek(tokens, pos).type != TokenType::END) {
-            parse_statement(tokens, pos);
+            node.children.push_back(parse_statement(tokens, pos));
         }
         expect(tokens, pos, TokenType::RPAREN);
         expect(tokens, pos, TokenType::COLON);
-        parse_block(tokens, pos);
-        break;
-    case TokenType::IF:
-        advance(tokens, pos);
+        node.children.push_back(parse_block(tokens, pos));
+        return node;
+    }
+
+    case TokenType::IF: {
+        Token token = advance(tokens, pos);
+        Node node = {
+            NodeType::IF,
+            token.line_number,
+            "",
+            {},
+        };
         while (peek(tokens, pos).type != TokenType::COLON &&
                peek(tokens, pos).type != TokenType::END) {
-            parse_expression(tokens, pos);
+            node.children.push_back(parse_expression(tokens, pos));
         }
         expect(tokens, pos, TokenType::COLON);
-        parse_block(tokens, pos);
-        break;
-    case TokenType::IDENT:
+        node.children.push_back(parse_block(tokens, pos));
+        return node;
+    }
+    case TokenType::IDENT: {
+        Token token = peek(tokens, pos);
         if (peek(tokens, pos + 1).type == TokenType::ASSIGN) {
-            expect(tokens, pos, TokenType::IDENT);
+
+            Node left = parse_expression(tokens, pos);
             expect(tokens, pos, TokenType::ASSIGN);
-            parse_expression(tokens, pos);
+            Node node = {
+                NodeType::ASSIGN,
+                token.line_number,
+                "",
+                {left, parse_expression(tokens, pos)},
+            };
+            return node;
         } else {
-            parse_expression(tokens, pos);
+            return parse_expression(tokens, pos);
         }
-        break;
-    case TokenType::STRING:
-        advance(tokens, pos);
-        break;
+    }
+    case TokenType::STRING: {
+        Token token = advance(tokens, pos);
+        return Node{
+            NodeType::STRING,
+            token.line_number,
+            token.value,
+            {},
+        };
+    }
     default:
         std::cerr << "[Error]: At Line " << peek(tokens, pos).line_number << " "
                   << peek(tokens, pos).value << "\n";
-        std::cerr << "Unexpected token at statement\n";
-        assert(false && "TODO: implement parse_statement");
+        throw std::runtime_error("Unexpected token at statement\n");
     }
 }
 
 Node parse_block(const std::vector<Token> &tokens, size_t &pos) {
     expect(tokens, pos, TokenType::LBRACE);
+    Token token = peek(tokens, pos);
+    Node node = {
+        NodeType::BLOCK,
+        token.line_number,
+        "",
+        {},
+    };
     while (peek(tokens, pos).type != TokenType::RBRACE &&
            peek(tokens, pos).type != TokenType::END) {
-        parse_statement(tokens, pos);
+        node.children.push_back(parse_statement(tokens, pos));
     }
     expect(tokens, pos, TokenType::RBRACE);
+    return node;
 }
