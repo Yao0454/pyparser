@@ -1,5 +1,6 @@
 #include "lexer.hpp"
 #include "parser.hpp"
+#include <cstddef>
 #include <fstream>
 #include <print>
 #include <stdexcept>
@@ -28,8 +29,13 @@ std::string strip(const std::string &s) {
     return s.substr(start, end - start + 1);
 }
 
-int main() {
-    std::ifstream file("./pyfile.py");
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        std::cerr << "[Error]: please provide the .py file!\nUsage pyparse <file_path>\n";
+        exit(1);
+    }
+    std::string file_path = argv[1];
+    std::ifstream file(file_path);
     if (!file) {
         std::cerr << "Unable to open the file!\n";
         return 1;
@@ -37,14 +43,16 @@ int main() {
 
     std::vector<Line> lines;
     std::string buf;
+    size_t current_line_number = 1;
     while (std::getline(file, buf)) {
         if (strip(buf).empty())
             continue;
-        lines.push_back({strip(buf), count_indent(buf)});
+        lines.push_back({strip(buf), count_indent(buf), current_line_number});
+        current_line_number += 1;
     }
     file.close();
 
-    std::vector<std::string> lines_with_indent = mark_indents(lines);
+    std::vector<Line> lines_with_indent = mark_indents(lines);
 
     std::vector<Token> tokens = tokenize(lines_with_indent);
 

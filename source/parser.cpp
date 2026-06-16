@@ -19,7 +19,31 @@ void expect(const std::vector<Token> &tokens, size_t &pos, TokenType t) {
 }
 
 void parse_primary(const std::vector<Token> &tokens, size_t &pos) {
-    assert(false && "parse_primary is not implemented yet");
+    switch (peek(tokens, pos).type) {
+    case TokenType::NUMBER:
+    case TokenType::STRING:
+        advance(tokens, pos);
+        break;
+    case TokenType::IDENT:
+        advance(tokens, pos);
+        if (peek(tokens, pos).type == TokenType::LPAREN) {
+            advance(tokens, pos);
+            while (peek(tokens, pos).type != TokenType::RPAREN &&
+                   peek(tokens, pos).type != TokenType::END) {
+                parse_statement(tokens, pos);
+            }
+            expect(tokens, pos, TokenType::RPAREN);
+        }
+        break;
+    case TokenType::LPAREN:
+        advance(tokens, pos);
+        parse_expression(tokens, pos);
+        expect(tokens, pos, TokenType::RPAREN);
+        break;
+    default:
+        std::cerr << "Unexpeted token in expression\n";
+        assert(false && "Unexpeted token in parse_primary");
+    }
 }
 
 void parse_additive(const std::vector<Token> &tokens, size_t &pos) {
@@ -63,8 +87,23 @@ void parse_statement(const std::vector<Token> &tokens, size_t &pos) {
         expect(tokens, pos, TokenType::COLON);
         parse_block(tokens, pos);
         break;
-    default:
+    case TokenType::IDENT:
+        if (peek(tokens, pos + 1).type == TokenType::ASSIGN) {
+            expect(tokens, pos, TokenType::IDENT);
+            expect(tokens, pos, TokenType::ASSIGN);
+            parse_expression(tokens, pos);
+        } else {
+            parse_expression(tokens, pos);
+        }
+        break;
+    case TokenType::STRING:
         advance(tokens, pos);
+        break;
+    default:
+        std::cerr << "[Error]: At Line " << peek(tokens, pos).line_number << " "
+                  << peek(tokens, pos).value << "\n";
+        std::cerr << "Unexpected token at statement\n";
+        assert(false && "TODO: implement parse_statement");
     }
 }
 
