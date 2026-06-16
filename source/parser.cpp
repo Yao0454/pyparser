@@ -18,53 +18,99 @@ void expect(const std::vector<Token> &tokens, size_t &pos, TokenType t) {
     pos += 1;
 }
 
-void parse_primary(const std::vector<Token> &tokens, size_t &pos) {
+Node parse_primary(const std::vector<Token> &tokens, size_t &pos) {
     switch (peek(tokens, pos).type) {
-    case TokenType::NUMBER:
-    case TokenType::STRING:
+    case TokenType::NUMBER: {
         advance(tokens, pos);
-        break;
-    case TokenType::IDENT:
+        return Node{
+            NodeType::NUMBER,
+            peek(tokens, pos).line_number,
+            peek(tokens, pos).value,
+            {},
+        };
+    }
+
+    case TokenType::STRING: {
         advance(tokens, pos);
+        return {
+            NodeType::STRING,
+            peek(tokens, pos).line_number,
+            peek(tokens, pos).value,
+            {},
+        };
+    }
+
+    case TokenType::IDENT: {
+        Token name = advance(tokens, pos);
         if (peek(tokens, pos).type == TokenType::LPAREN) {
             advance(tokens, pos);
+            Node call = {
+                NodeType::CALL,
+                name.line_number,
+                name.value,
+                {},
+            };
             while (peek(tokens, pos).type != TokenType::RPAREN &&
                    peek(tokens, pos).type != TokenType::END) {
-                parse_statement(tokens, pos);
+                call.children.push_back(parse_expression(tokens, pos));
             }
             expect(tokens, pos, TokenType::RPAREN);
+            return call;
         }
-        break;
-    case TokenType::LPAREN:
+        return Node{
+            NodeType::IDENT,
+            name.line_number,
+            name.value,
+            {},
+        };
+    }
+    case TokenType::LPAREN: {
         advance(tokens, pos);
-        parse_expression(tokens, pos);
+        Node inner = parse_expression(tokens, pos);
         expect(tokens, pos, TokenType::RPAREN);
-        break;
+        return inner;
+    }
     default:
+        std::cerr << "[Error]: At Line " << peek(tokens, pos).line_number << " "
+                  << peek(tokens, pos).value << "\n";
         std::cerr << "Unexpeted token in expression\n";
         assert(false && "Unexpeted token in parse_primary");
     }
 }
 
-void parse_additive(const std::vector<Token> &tokens, size_t &pos) {
-    parse_primary(tokens, pos);
+Node parse_additive(const std::vector<Token> &tokens, size_t &pos) {
+    Node left = parse_primary(tokens, pos);
     while (peek(tokens, pos).type == TokenType::PLUS ||
            peek(tokens, pos).type == TokenType::MINUS) {
-        advance(tokens, pos);
-        parse_primary(tokens, pos);
+        Token op = advance(tokens, pos);
+        Node right = parse_primary(tokens, pos);
+        left = Node{
+            NodeType::BINOP,
+            op.line_number,
+            op.value,
+            {left, right},
+        };
     }
+    return left;
 }
 
-void parse_expression(const std::vector<Token> &tokens, size_t &pos) {
-    parse_additive(tokens, pos);
+Node parse_expression(const std::vector<Token> &tokens, size_t &pos) {
+    Node left = parse_additive(tokens, pos);
     while (peek(tokens, pos).type == TokenType::GREATER ||
            peek(tokens, pos).type == TokenType::LESS) {
-        advance(tokens, pos);
-        parse_additive(tokens, pos);
+        Token op = advance(tokens, pos);
+        Node right = parse_additive(tokens, pos);
+        left = Node{
+            NodeType::BINOP,
+            op.line_number,
+            op.value,
+            {left, right},
+        };
     }
+    return left;
 }
 
-void parse_statement(const std::vector<Token> &tokens, size_t &pos) {
+Node parse_statement(const std::vector<Token> &tokens, size_t &pos) {
     switch (peek(tokens, pos).type) {
     case TokenType::DEF:
         advance(tokens, pos);
@@ -107,7 +153,7 @@ void parse_statement(const std::vector<Token> &tokens, size_t &pos) {
     }
 }
 
-void parse_block(const std::vector<Token> &tokens, size_t &pos) {
+Node parse_block(const std::vector<Token> &tokens, size_t &pos) {
     expect(tokens, pos, TokenType::LBRACE);
     while (peek(tokens, pos).type != TokenType::RBRACE &&
            peek(tokens, pos).type != TokenType::END) {
