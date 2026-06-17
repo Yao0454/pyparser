@@ -197,3 +197,38 @@ Node parse_block(const std::vector<Token> &tokens, size_t &pos) {
     expect(tokens, pos, TokenType::RBRACE);
     return node;
 }
+
+const char *node_type_name(NodeType t) {
+    switch (t) {
+    case NodeType::NUMBER:
+        return "NUMBER";
+    case NodeType::IDENT:
+        return "IDENT";
+    case NodeType::BINOP:
+        return "BINOP";
+    case NodeType::STRING:
+        return "STRING";
+    case NodeType::ASSIGN:
+        return "ASSIGN";
+    case NodeType::CALL:
+        return "CALL";
+    case NodeType::BLOCK:
+        return "BLOCK";
+    case NodeType::IF:
+        return "IF";
+    case NodeType::FUNCDEF:
+        return "FUNCDEF";
+    }
+    return "?";
+}
+
+void print_node(const Node &node, int depth) {
+    for (int i = 0; i < depth; ++i)
+        std::print("  ");
+
+    std::println("{} {}", node_type_name(node.type), node.value);
+
+    for (const Node &child : node.children) {
+        print_node(child, depth + 1);
+    }
+}

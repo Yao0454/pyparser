@@ -1,3 +1,4 @@
+#include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include <cstddef>
@@ -61,8 +62,13 @@ int main(int argc, char **argv) {
     // }
 
     size_t pos = 0;
+    // while (peek(tokens, pos).type != TokenType::END) {
+    //     parse_statement(tokens, pos);
+    // }
+    // std::println("Parse OK");
+
     while (peek(tokens, pos).type != TokenType::END) {
-        parse_statement(tokens, pos);
+        Node stmt = parse_statement(tokens, pos);
+        iter_node(stmt);
     }
-    std::println("Parse OK");
 }

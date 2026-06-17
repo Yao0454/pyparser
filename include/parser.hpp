@@ -34,4 +34,7 @@ Node parse_expression(const std::vector<Token> &tokens, size_t &pos);
 Node parse_statement(const std::vector<Token> &tokens, size_t &pos);
 Node parse_block(const std::vector<Token> &tokens, size_t &pos);
 
+const char *node_type_name(NodeType t);
+void print_node(const Node &node, int depth);
+
 #endif // PARSER_HPP_

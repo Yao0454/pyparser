@@ -12,5 +12,6 @@ add_executable(pyparser
     main.cpp
     source/lexer.cpp
     source/parser.cpp
+    source/interpreter.cpp
 )
 target_include_directories(pyparser PRIVATE "${CMAKE_SOURCE_DIR}/include")
