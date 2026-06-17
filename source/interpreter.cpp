@@ -1,20 +1,36 @@
 #include "interpreter.hpp"
 #include "parser.hpp"
 #include <cassert>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+std::unordered_map<std::string, void *> ident_pool;
 
 void itpt_funcdef(const Node &node) {
-    (void)node;
-    assert(false && "interprete function def is not implemented yet!");
+    for (const Node &child : node.children) {
+        iter_node(child);
+    }
 }
 
 void itpt_block(const Node &node) {
-    (void)node;
-    assert(false && "interprete code is not implemented yet!");
+    for (const Node &child : node.children) {
+        iter_node(child);
+    }
 }
 
 void itpt_assign(const Node &node) {
-    (void)node;
-    assert(false && "interprete assign is not implemented yet!");
+    itpt_ident(node.children[0]);
+    switch (node.children[1].type) {
+    case NodeType::NUMBER:
+        itpt_number(node.children[1]);
+        break;
+    case NodeType::STRING:
+        itpt_string(node.children[1]);
+        break;
+    default:
+        assert(false && "Can not assign this NodeType!");
+    }
 }
 
 void itpt_ident(const Node &node) {
@@ -22,7 +38,7 @@ void itpt_ident(const Node &node) {
     assert(false && "interprete ident is not implemented yet!");
 }
 
-void itpt_number(const Node &node) {
+int *itpt_number(const Node &node) {
     (void)node;
     assert(false && "interprete number is not implemented yet!");
 }

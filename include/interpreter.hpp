@@ -9,7 +9,7 @@ void itpt_block(const Node &node);
 void itpt_assign(const Node &node);
 void iter_node(const Node &node);
 void itpt_ident(const Node &node);
-void itpt_number(const Node &node);
+int *itpt_number(const Node &node);
 void itpt_if(const Node &node);
 void itpt_binop(const Node &node);
 void itpt_call(const Node &node);
