@@ -36,8 +36,76 @@ Value eval(const Node &node) {
         }
     case NodeType::IF: {
         Node op = node.children[0];
+        assert(op.type == NodeType::BINOP);
         Node block = node.children[1];
-    }
+        assert(block.type == NodeType::BLOCK);
+        Node l = op.children[0];
+        Node r = op.children[0];
+        Value l_v = eval(l);
+        Value r_v = eval(r);
+        if (op.value == ">") {
+            if (l_v.number > r_v.number) {
+                exec(block);
+                return {
+                    ValueType::BOOLEAN,
+                    0,
+                    "",
+                    true,
+                };
+            } else {
+                return {
+                    ValueType::BOOLEAN,
+                    0,
+                    "",
+                    false,
+                };
+            }
+        } else if (op.value == "<") {
+            if (l_v.number < r_v.number) {
+                exec(block);
+                return {
+                    ValueType::BOOLEAN,
+                    0,
+                    "",
+                    true,
+                };
+            } else {
+                return {
+                    ValueType::BOOLEAN,
+                    0,
+                    "",
+                    false,
+                };
+            }
+        }
+    } break;
+    case NodeType::BINOP: {
+        Node l = node.children[0];
+        Node r = node.children[1];
+        Value l_v = eval(l);
+        Value r_v = eval(r);
+        if (l_v.type != ValueType::NUMBER || r_v.type != ValueType::NUMBER) {
+            std::cerr << "Can not do binop with non-number values!\n";
+            exit(1);
+        }
+        if (node.value == "+") {
+            return Value{
+                ValueType::NUMBER,
+                l_v.number + r_v.number,
+                "",
+                false,
+            };
+        } else if (node.value == "-") {
+            return Value{
+                ValueType::NUMBER,
+                l_v.number - r_v.number,
+                "",
+                false,
+            };
+        } else {
+            assert(false && "[Error]: Invalid operator!");
+        }
+    } break;
     default:
         assert(false && "[Error]: UNREABHABLE!");
     }
