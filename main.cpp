@@ -48,7 +48,11 @@ int main(int argc, char **argv) {
     while (std::getline(file, buf)) {
         if (strip(buf).empty())
             continue;
-        lines.push_back({strip(buf), count_indent(buf), current_line_number});
+        lines.push_back({
+            strip(buf),
+            count_indent(buf),
+            current_line_number,
+        });
         current_line_number += 1;
     }
     file.close();
@@ -69,6 +73,6 @@ int main(int argc, char **argv) {
 
     while (peek(tokens, pos).type != TokenType::END) {
         Node stmt = parse_statement(tokens, pos);
-        iter_node(stmt);
+        exec(stmt);
     }
 }

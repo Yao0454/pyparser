@@ -18,12 +18,20 @@ std::vector<Line> mark_indents(const std::vector<Line> &lines) {
             lines_with_indent.push_back(line);
         } else if (line.indent > indent_stack.top()) {
             indent_stack.push(line.indent);
-            lines_with_indent.push_back({"INDENT", line.indent, line.line_number});
+            lines_with_indent.push_back({
+                "INDENT",
+                line.indent,
+                line.line_number,
+            });
             lines_with_indent.push_back(line);
         } else {
             while (line.indent < indent_stack.top()) {
                 indent_stack.pop();
-                lines_with_indent.push_back({"DEDENT", line.indent, line.line_number});
+                lines_with_indent.push_back({
+                    "DEDENT",
+                    line.indent,
+                    line.line_number,
+                });
             }
             if (line.indent != indent_stack.top()) {
                 std::cerr << "IndentationError: " << line.text << "\n";
@@ -60,15 +68,35 @@ std::vector<Token> tokenize(const std::vector<Line> &lines) {
                 std::string word = line_string.substr(start, i - start);
 
                 if (word == "def") {
-                    tokens.push_back({word, TokenType::DEF, line.line_number});
+                    tokens.push_back({
+                        word,
+                        TokenType::DEF,
+                        line.line_number,
+                    });
                 } else if (word == "if") {
-                    tokens.push_back({word, TokenType::IF, line.line_number});
+                    tokens.push_back({
+                        word,
+                        TokenType::IF,
+                        line.line_number,
+                    });
                 } else if (word == "INDENT") {
-                    tokens.push_back({"{", TokenType::LBRACE, line.line_number});
+                    tokens.push_back({
+                        "{",
+                        TokenType::LBRACE,
+                        line.line_number,
+                    });
                 } else if (word == "DEDENT") {
-                    tokens.push_back({"}", TokenType::RBRACE, line.line_number});
+                    tokens.push_back({
+                        "}",
+                        TokenType::RBRACE,
+                        line.line_number,
+                    });
                 } else {
-                    tokens.push_back({word, TokenType::IDENT, line.line_number});
+                    tokens.push_back({
+                        word,
+                        TokenType::IDENT,
+                        line.line_number,
+                    });
                 }
                 continue;
             } else if (c == '"') {
@@ -81,8 +109,11 @@ std::vector<Token> tokenize(const std::vector<Line> &lines) {
                         assert(false && "unterminated string");
                     }
                 }
-                tokens.push_back({line_string.substr(start + 1, i - start - 1), TokenType::STRING,
-                                  line.line_number});
+                tokens.push_back({
+                    line_string.substr(start + 1, i - start - 1),
+                    TokenType::STRING,
+                    line.line_number,
+                });
                 i += 1;
                 continue;
             } else if (std::isdigit(static_cast<unsigned char>(c))) {
@@ -91,47 +122,86 @@ std::vector<Token> tokenize(const std::vector<Line> &lines) {
                        std::isdigit(static_cast<unsigned char>(line_string[i]))) {
                     i += 1;
                 }
-                tokens.push_back(
-                    {line_string.substr(start, i - start), TokenType::NUMBER, line.line_number});
+                tokens.push_back({
+                    line_string.substr(start, i - start),
+                    TokenType::NUMBER,
+                    line.line_number,
+                });
                 continue;
             } else if (c == ' ') {
                 i += 1;
                 continue;
             } else if (c == '+') {
                 i += 1;
-                tokens.push_back({"+", TokenType::PLUS, line.line_number});
+                tokens.push_back({
+                    "+",
+                    TokenType::PLUS,
+                    line.line_number,
+                });
                 continue;
             } else if (c == '-') {
                 i += 1;
-                tokens.push_back({"-", TokenType::MINUS, line.line_number});
+                tokens.push_back({
+                    "-",
+                    TokenType::MINUS,
+                    line.line_number,
+                });
                 continue;
             } else if (c == '=') {
                 i += 1;
-                tokens.push_back({"=", TokenType::ASSIGN, line.line_number});
+                tokens.push_back({
+                    "=",
+                    TokenType::ASSIGN,
+                    line.line_number,
+                });
                 continue;
             } else if (c == ':') {
                 i += 1;
-                tokens.push_back({":", TokenType::COLON, line.line_number});
+                tokens.push_back({
+                    ":",
+                    TokenType::COLON,
+                    line.line_number,
+                });
                 continue;
             } else if (c == '(') {
                 i += 1;
-                tokens.push_back({"(", TokenType::LPAREN, line.line_number});
+                tokens.push_back({
+                    "(",
+                    TokenType::LPAREN,
+                    line.line_number,
+                });
                 continue;
             } else if (c == ')') {
                 i += 1;
-                tokens.push_back({")", TokenType::RPAREN, line.line_number});
+                tokens.push_back({
+                    ")",
+                    TokenType::RPAREN,
+                    line.line_number,
+                });
                 continue;
             } else if (c == '>') {
                 i += 1;
-                tokens.push_back({">", TokenType::GREATER, line.line_number});
+                tokens.push_back({
+                    ">",
+                    TokenType::GREATER,
+                    line.line_number,
+                });
             } else if (c == '<') {
                 i += 1;
-                tokens.push_back({"<", TokenType::LESS, line.line_number});
+                tokens.push_back({
+                    "<",
+                    TokenType::LESS,
+                    line.line_number,
+                });
             } else {
                 assert(false && "Unknown char expected");
             }
         }
     }
-    tokens.push_back({"", TokenType::END, 0});
+    tokens.push_back({
+        "",
+        TokenType::END,
+        0,
+    });
     return tokens;
 }

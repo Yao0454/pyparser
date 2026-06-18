@@ -1,225 +1,148 @@
 #include "interpreter.hpp"
 #include "parser.hpp"
-#include <cassert>
+#include <cstdlib>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-std::unordered_map<std::string, Value> variebles;
+std::unordered_map<std::string, Value> variables;
+std::unordered_map<std::string, Node> functions;
 
 Value eval(const Node &node) {
     switch (node.type) {
     case NodeType::NUMBER:
         return Value{
             ValueType::NUMBER,
-            stoi(node.value),
+            std::stoi(node.value),
             "",
             false,
         };
+
+    case NodeType::STRING:
+        return Value{
+            ValueType::STRING,
+            0,
+            node.value,
+            false,
+        };
+
     case NodeType::IDENT:
-        if (node.value == "True") {
+        if (node.value == "True")
             return Value{
                 ValueType::BOOLEAN,
                 0,
                 "",
                 true,
             };
-        } else if (node.value == "False") {
+        if (node.value == "False")
             return Value{
                 ValueType::BOOLEAN,
                 0,
                 "",
                 false,
             };
-        } else {
-            return variebles[node.value];
-        }
-    case NodeType::IF: {
-        Node op = node.children[0];
-        assert(op.type == NodeType::BINOP);
-        Node block = node.children[1];
-        assert(block.type == NodeType::BLOCK);
-        Node l = op.children[0];
-        Node r = op.children[0];
-        Value l_v = eval(l);
-        Value r_v = eval(r);
-        if (op.value == ">") {
-            if (l_v.number > r_v.number) {
-                exec(block);
-                return {
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    true,
-                };
-            } else {
-                return {
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    false,
-                };
-            }
-        } else if (op.value == "<") {
-            if (l_v.number < r_v.number) {
-                exec(block);
-                return {
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    true,
-                };
-            } else {
-                return {
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    false,
-                };
-            }
-        }
-    } break;
+        return variables[node.value];
+
     case NodeType::BINOP: {
-        Node l = node.children[0];
-        Node r = node.children[1];
-        Value l_v = eval(l);
-        Value r_v = eval(r);
-        if (l_v.type != ValueType::NUMBER || r_v.type != ValueType::NUMBER) {
-            std::cerr << "Can not do binop with non-number values!\n";
+        Value l = eval(node.children[0]);
+        Value r = eval(node.children[1]);
+        if (l.type != ValueType::NUMBER || r.type != ValueType::NUMBER) {
+            std::cerr << "[Error]: binop needs number operands\n";
             exit(1);
         }
-        if (node.value == "+") {
+        if (node.value == "+")
             return Value{
                 ValueType::NUMBER,
-                l_v.number + r_v.number,
+                l.number + r.number,
                 "",
                 false,
             };
-        } else if (node.value == "-") {
+        if (node.value == "-")
             return Value{
                 ValueType::NUMBER,
-                l_v.number - r_v.number,
+                l.number - r.number,
                 "",
                 false,
             };
-        } else {
-            assert(false && "[Error]: Invalid operator!");
-        }
-    } break;
-    default:
-        assert(false && "[Error]: UNREABHABLE!");
+        if (node.value == ">")
+            return Value{
+                ValueType::BOOLEAN,
+                0,
+                "",
+                l.number > r.number,
+            };
+        if (node.value == "<")
+            return Value{
+                ValueType::BOOLEAN,
+                0,
+                "",
+                l.number < r.number,
+            };
+        std::cerr << "[Error]: unknown operator " << node.value << "\n";
+        exit(1);
     }
-    assert(false && "function eval is not implemented yet");
+
+    default:
+        std::cerr << "[Error]: eval cannot handle this node\n";
+        exit(1);
+    }
+}
+
+static void builtin_print(const Node &call) {
+    for (size_t i = 0; i < call.children.size(); ++i) {
+        if (i > 0)
+            std::cout << " ";
+        Value v = eval(call.children[i]);
+        switch (v.type) {
+        case ValueType::NUMBER:
+            std::cout << v.number;
+            break;
+        case ValueType::STRING:
+            std::cout << v.str;
+            break;
+        case ValueType::BOOLEAN:
+            std::cout << (v.boolean ? "True" : "False");
+            break;
+        }
+    }
+    std::cout << "\n";
 }
 
 void exec(const Node &node) {
     switch (node.type) {
-    case NodeType::ASSIGN: {
-        Node l = node.children[0];
-        Node r = node.children[1];
-        assert(l.type == NodeType::IDENT);
-        if (r.type == NodeType::NUMBER) {
-            variebles[l.value] = Value{
-                ValueType::NUMBER,
-                stoi(r.value),
-                "",
-                false,
-            };
-        } else if (r.type == NodeType::STRING) {
-            variebles[l.value] = Value{
-                ValueType::STRING,
-                0,
-                r.value,
-                false,
-            };
-        } else if (r.type == NodeType::IDENT) {
-            if (r.value == "True") {
-                variebles[l.value] = Value{
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    true,
-                };
-            } else if (r.value == "False") {
-                variebles[l.value] = Value{
-                    ValueType::BOOLEAN,
-                    0,
-                    "",
-                    false,
-                };
-            } else {
-                variebles[l.value] = variebles[r.value];
-            }
-        }
-    } break;
-    default:
-        assert(false && "function exec is not implemented yet");
-    }
-}
-
-void itpt_funcdef(const Node &node) {
-    for (const Node &child : node.children) {
-        iter_node(child);
-    }
-}
-
-void itpt_block(const Node &node) {
-    for (const Node &child : node.children) {
-        iter_node(child);
-    }
-}
-
-void itpt_assign(const Node &node) { exec(node); }
-
-void itpt_number(const Node &node) {
-    (void)node;
-    assert(false && "interprete number is not implemented yet!");
-}
-
-Value itpt_if(const Node &node) { return eval(node); }
-
-void itpt_binop(const Node &node) {
-    (void)node;
-    assert(false && "interprete binop is not implemented yet!");
-}
-
-void itpt_call(const Node &node) {
-    (void)node;
-    assert(false && "interprete function call is not implemented yet!");
-}
-
-void itpt_string(const Node &node) {
-    (void)node;
-    assert(false && "interprete string is not implemented yet!");
-}
-
-void iter_node(const Node &node) {
-    switch (node.type) {
     case NodeType::FUNCDEF:
-        itpt_funcdef(node);
+        functions[node.value] = node;
         break;
+
     case NodeType::BLOCK:
-        itpt_block(node);
+        for (const Node &child : node.children)
+            exec(child);
         break;
+
     case NodeType::ASSIGN:
-        itpt_assign(node);
+        variables[node.children[0].value] = eval(node.children[1]);
         break;
-    case NodeType::NUMBER:
-        itpt_number(node);
-        break;
+
     case NodeType::IF:
-        itpt_if(node);
+        if (eval(node.children[0]).boolean)
+            exec(node.children[1]);
         break;
-    case NodeType::BINOP:
-        itpt_binop(node);
-        break;
+
     case NodeType::CALL:
-        itpt_call(node);
+        if (node.value == "print") {
+            builtin_print(node);
+        } else if (functions.count(node.value)) {
+            const Node &fn = functions[node.value];
+            exec(fn.children.back());
+        } else {
+            std::cerr << "[Error]: unknown function " << node.value << "\n";
+            exit(1);
+        }
         break;
-    case NodeType::STRING:
-        itpt_string(node);
-        break;
+
     default:
-        assert(false && "iter_node: UNREACHABLE!");
+        std::cerr << "[Error]: exec cannot handle this statement\n";
+        exit(1);
     }
 }
