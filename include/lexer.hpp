@@ -22,6 +22,7 @@ enum class TokenType {
     GREATER,
     LESS,
     IF,
+    ELSE,
     ASSIGN,
     DEF,
     NUMBER,

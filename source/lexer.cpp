@@ -79,6 +79,12 @@ std::vector<Token> tokenize(const std::vector<Line> &lines) {
                         TokenType::IF,
                         line.line_number,
                     });
+                } else if (word == "else") {
+                    tokens.push_back({
+                        word,
+                        TokenType::ELSE,
+                        line.line_number,
+                    });
                 } else if (word == "INDENT") {
                     tokens.push_back({
                         "{",
