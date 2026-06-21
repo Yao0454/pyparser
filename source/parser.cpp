@@ -146,6 +146,13 @@ Node parse_statement(const std::vector<Token> &tokens, size_t &pos) {
         }
         expect(tokens, pos, TokenType::COLON);
         node.children.push_back(parse_block(tokens, pos));
+
+        if (peek(tokens, pos).type == TokenType::ELSE) {
+            advance(tokens, pos);
+            expect(tokens, pos, TokenType::COLON);
+            node.children.push_back(parse_block(tokens, pos));
+        }
+
         return node;
     }
     case TokenType::IDENT: {

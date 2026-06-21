@@ -125,8 +125,11 @@ void exec(const Node &node) {
         break;
 
     case NodeType::IF:
-        if (eval(node.children[0]).boolean)
+        if (eval(node.children[0]).boolean) {
             exec(node.children[1]);
+        } else if (node.children.size() > 2) {
+            exec(node.children[2]);
+        }
         break;
 
     case NodeType::CALL:
